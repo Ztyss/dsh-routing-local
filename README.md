@@ -5,7 +5,7 @@ dsh-routing-suite 的**私有维护仓**：同款组织方式（`injector/` + `p
 
 - 上游源：https://github.com/yjh051108/dsh-super-injector （injector，fork 自 tag v0.3.5）
 - 组织参照：https://github.com/yjh051108/dsh-routing-suite
-- 维护参考：**[docs/定制指南.md](docs/定制指南.md)**（唯一维护参考，权威副本在本仓）
+- 维护参考：**[docs/本地定制台账.md](docs/本地定制台账.md)**（唯一维护参考，权威副本在本仓）
 
 ## 布局
 
@@ -17,12 +17,12 @@ injector/                      dsh-super-injector v0.3.5 源码 + 本地定制�
   scripts/local-pack.mjs       A2+A4 本地打包：剥 sourcemap + 剥 devDeps/peerDeps → package/ 顶层 tgz
 preset/router-standard/        本机运行副本原样入仓（B1–B7 定制 + 双 selftest，?v= 见 agent.cordis.yml）
 preset/router-spec/            本机运行副本原样入仓（D1/D2 定制）
-docs/定制指南.md                唯一维护参考
+docs/本地定制台账.md            唯一维护参考（现状台账 + 安装/升级/验证流程）
 ```
 
 `.gitignore`：`lib/`、`node_modules/`、`*.tgz` 不入库（同上游口径，构建产物用 local-pack 现打）。
 
-## 定制台账（详见 docs 指南第二节）
+## 定制台账（详见 docs 台账第二节）
 
 | 组 | 定制 |
 |---|---|
@@ -52,6 +52,6 @@ dsh plugin --profile web add "@dsh-external/dsh-super-injector@file:<输出目�
 
 ## 同步上游
 
-- **injector**：取上游新 release 源码覆盖 `injector/` → 对照 docs 指南第二节核对 A1/A3 是否已被上游吸收（未吸收则重放）→ `local-pack` 重打 → 重装。
+- **injector**：取上游新 release 源码覆盖 `injector/` → 对照 docs 台账第二节核对 A1/A3 是否已被上游吸收（未吸收则重放）→ commit/push → 本机重跑 github 直装 → 重启 DSH。
 - **preset**：取上游 `preset/` → 对照 B/C/D 清单重放本地定制 → 覆盖 `preset/` → bump `?v=` → 双 selftest → 新会话验证。
-- PR #110/#117/#120 与 issue #36 合入上游后，B1/B2、B5、B6、B7/C1 相应退役（以 docs 指南第二节状态列为准）。
+- 上游吸收情况每次同步时重新核对（以 docs 台账第二节为准）。
