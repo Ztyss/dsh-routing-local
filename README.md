@@ -1,0 +1,49 @@
+# dsh-routing-local
+
+dsh-routing-suite 的**私有维护仓**：同款组织方式（`injector/` + `preset/`），
+收拢 injector v0.3.5 源码（含本地定制）与本机定制版 presets。
+
+- 上游源：https://github.com/yjh051108/dsh-super-injector （injector，fork 自 tag v0.3.5）
+- 组织参照：https://github.com/yjh051108/dsh-routing-suite
+- 维护参考：[docs/dsh-routing-suite-维护指南.md](docs/dsh-routing-suite-维护指南.md)
+  （与本机 `~/.dsh/storages/vendor/` 同名文件保持同步，修改时两边一起改）
+
+## 布局
+
+```
+injector/                      dsh-super-injector v0.3.5 源码 + 本地定制
+  src/index.ts                 A1 loadCache 可选链修复（listPlugins，已烘进源码）
+  src/client/index.ts          A3 客户端 UI 置空 shim（整文件替代上游设置页）
+  scripts/local-pack.mjs       A2+A4 本地打包：剥 sourcemap + 剥 devDeps/peerDeps → package/ 顶层 tgz
+preset/router-standard/        本机运行副本原样入仓（B1–B7 定制 + 双 selftest，?v= 见 agent.cordis.yml）
+preset/router-spec/            本机运行副本原样入仓（D1/D2 定制）
+docs/                          维护指南
+```
+
+`.gitignore`：`lib/`、`node_modules/`、`*.tgz` 不入库（同上游口径，构建产物用 local-pack 现打）。
+
+## 定制台账（详见 docs 指南第二节）
+
+| 组 | 定制 |
+|---|---|
+| injector A1–A4 | loadCache 可选链（已烘进 src）· 剥 sourcemap（打包脚本）· 客户端 UI 置空（已烘进 src）· 打包剥 devDeps/peerDeps（打包脚本） |
+| standard B1–B7 | persona 双键 · sessionEvents shim · MCP 工具进阶段 0 · engram 退役 · skill 常驻(#117) · 委派豁免(#120) · shell 纪律行(#36) |
+| executor C1 | 信号融合(#36，含 selftest) |
+| spec D1/D2 | persona 双键 + sessionEvents shim · 读图能力查询 |
+
+## 从源码重建部署包
+
+```bash
+cd injector
+npm install                 # devDeps 全为公共包
+node scripts/prepare.mjs    # 构建 lib/（含发布面脱敏）
+node scripts/local-pack.mjs 0.3.5 <输出目录>
+dsh plugin --profile web add "@dsh-external/dsh-super-injector@file:<输出目录>/dsh-super-injector-0.3.5.tgz"
+# 重启 DSH 生效
+```
+
+## 同步上游
+
+- **injector**：取上游新 release 源码覆盖 `injector/` → 对照 docs 指南第二节核对 A1/A3 是否已被上游吸收（未吸收则重放）→ `local-pack` 重打 → 重装。
+- **preset**：取上游 `preset/` → 对照 B/C/D 清单重放本地定制 → 覆盖 `preset/` → bump `?v=` → 双 selftest → 新会话验证。
+- PR #110/#117/#120 与 issue #36 合入上游后，B1/B2、B5、B6、B7/C1 相应退役（以 docs 指南第二节状态列为准）。
