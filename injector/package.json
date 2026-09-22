@@ -37,11 +37,6 @@
       "platform": "web"
     }
   },
-  "peerDependencies": {
-    "@deepseek-ai/dsh-tools": ">=0.0.1-rc <2",
-    "@deepseek-ai/cordis": ">=4.0.0-rc <5",
-    "@deepseek-ai/schemastery": "^3.18.2"
-  },
   "devDependencies": {
     "@types/node": "^24.13.3",
     "tsdown": "^0.22.14",
