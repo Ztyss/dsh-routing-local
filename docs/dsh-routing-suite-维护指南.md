@@ -25,6 +25,7 @@
 - 旧版 0.3.3 tarball 已从 vendor 移除；如需回滚，从 release 重取 `v0.3.3` 资产按第三节重装。
 - profile 依赖（`~/.dsh/profiles/web/package.json`）：`"@dsh-external/dsh-super-injector": "file:…/dsh-super-injector-0.3.5.tgz"`，并列于 `dsh.profile.bundles`。
 - preset 生效戳现值（会腐化，以 `agent.cordis.yml` 实际值为准）：std bootstrap `?v=94`、executor `?v=52`、spec `?v=2`。
+- **私有维护仓**：https://github.com/Ztyss/dsh-routing-local （PRIVATE）——injector v0.3.5 源码（A1/A3 已烘进 src，A2/A4 走 `injector/scripts/local-pack.mjs`）+ 本机定制 presets + 本指南副本。本地工作副本 `%TEMP%\dsh-routing-local`（随用随弃，权威在远端，git 需 `http.sslBackend schannel` 穿 TLS 重置）。同步上游先在仓里做 diff/重放，push 后再落回本机。
 
 **为什么用 tarball**：源码目录形态约 1.2 MB 且长期占位；tarball 形态 ~140 KB、`node_modules`
 内只有一份实体、删源码目录后完全自洽。上游 `lib/` 不入 git，release 资产由 `prepare.mjs`
@@ -157,3 +158,4 @@ Remove-Item "$env:USERPROFILE\.dsh\.agent-presets\router-spec" -Recurse
 | 2026-09-15 | 上游产出 #116/#117（skill 常驻）、#119/#120（委派豁免），均为 open PR | 上游 |
 | 2026-09-19 | 上游产出 issue #36（executor 信号短路，open，无 PR） | 上游 |
 | 2026-09-20 | injector 0.3.3→0.3.5（A1–A4 重放，release 资产直取）；同步 #117/#120（B5/B6）；修复 #36（C1+B7）；清临时文件；本指南精简重写 | release v0.3.5 |
+| 2026-09-20 | 建私有维护仓 Ztyss/dsh-routing-local：injector 0.3.5 源码 fork（A1/A3 烘入 src + local-pack 打包脚本）+ presets 同仓；root commit 365c2a6 | 用户指令 |
