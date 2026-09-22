@@ -5,19 +5,19 @@ dsh-routing-suite 的**私有维护仓**：同款组织方式（`injector/` + `p
 
 - 上游源：https://github.com/yjh051108/dsh-super-injector （injector，fork 自 tag v0.3.5）
 - 组织参照：https://github.com/yjh051108/dsh-routing-suite
-- 维护参考：[docs/dsh-routing-suite-维护指南.md](docs/dsh-routing-suite-维护指南.md)
-  （与本机 `~/.dsh/storages/vendor/` 同名文件保持同步，修改时两边一起改）
+- 维护参考：**[docs/定制指南.md](docs/定制指南.md)**（唯一维护参考，权威副本在本仓）
 
 ## 布局
 
 ```
-injector/                      dsh-super-injector v0.3.5 源码 + 本地定制
+injector/                      dsh-super-injector v0.3.5 源码 + 本地定制（本机以 github 直装消费）
   src/index.ts                 A1 loadCache 可选链修复（listPlugins，已烘进源码）
   src/client/index.ts          A3 客户端 UI 置空 shim（整文件替代上游设置页）
+  .npmrc                       auto-install-peers=false（git 直装 prepare 保命，见指南三）
   scripts/local-pack.mjs       A2+A4 本地打包：剥 sourcemap + 剥 devDeps/peerDeps → package/ 顶层 tgz
 preset/router-standard/        本机运行副本原样入仓（B1–B7 定制 + 双 selftest，?v= 见 agent.cordis.yml）
 preset/router-spec/            本机运行副本原样入仓（D1/D2 定制）
-docs/                          维护指南
+docs/定制指南.md                唯一维护参考
 ```
 
 `.gitignore`：`lib/`、`node_modules/`、`*.tgz` 不入库（同上游口径，构建产物用 local-pack 现打）。
@@ -31,7 +31,15 @@ docs/                          维护指南
 | executor C1 | 信号融合(#36，含 selftest) |
 | spec D1/D2 | persona 双键 + sessionEvents shim · 读图能力查询 |
 
-## 从源码重建部署包
+## 安装（本机消费本仓）
+
+```bash
+# 首选：github 直装（pnpm 走 git 拉私有仓，prepare 自动构建 lib/；需全局 git schannel + gh 凭据）
+dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:injector"
+# 重启 DSH 生效
+```
+
+## 从源码重建发布 tgz（可选：需要发布件时才走这条）
 
 ```bash
 cd injector
