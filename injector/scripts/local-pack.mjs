@@ -12,7 +12,8 @@
  *   4. A3 校验：lib/client.js 必须是本机 shim（含空 apply 且体积 < 2KB）
  *   5. tar 出 package/ 顶层 tgz（pnpm/DSH 可直接 file: 安装）
  */
-import { cpSync, rmSync, readFileSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs'
+import { cpSync, rmSync, readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
@@ -24,12 +25,13 @@ if (!ver) {
 }
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = resolve(process.argv[3] || root)
-const stage = join(root, '.local-pack')
+const stage = process.env.LOCAL_PACK_STAGE || join(tmpdir(), 'dsh-routing-local-pack')
+rmSync(join(root, '.local-pack'), { recursive: true, force: true })
 
 rmSync(stage, { recursive: true, force: true })
 cpSync(root, join(stage, 'package'), {
   recursive: true,
-  filter: (s) => !s.includes('node_modules') && !s.includes('.local-pack'),
+  filter: (s) => !s.includes('node_modules') && !s.includes('.local-pack') && !s.includes('.git'),
 })
 
 const pkgDir = join(stage, 'package')
@@ -67,10 +69,13 @@ delete j.peerDependencies
 j.version = ver
 writeFileSync(pjPath, JSON.stringify(j, null, 2) + '\n')
 
-// 出包（package/ 顶层）
-const out = join(outDir, `dsh-super-injector-${ver}.tgz`)
+// 出包（package/ 顶层）——tar 先写 stage 内相对路径，避免 Windows 盘符被 GNU tar 当远程主机
+const rel = `dsh-super-injector-${ver}.tgz`
+execSync(`tar -czf "${rel}" package`, { cwd: stage, stdio: 'inherit' })
+const out = join(outDir, rel)
 rmSync(out, { force: true })
-execSync(`tar -czf "${out}" package`, { cwd: stage, stdio: 'inherit' })
+mkdirSync(outDir, { recursive: true })
+cpSync(join(stage, rel), out)
 const size = statSync(out).size
 if (size < 50000) { console.error(`FAIL: 包体积异常（${size} B）`); process.exit(1) }
 console.log(`PACK   ${out} (${size} B)  剥 sourcemap ${stripped} 处`)
