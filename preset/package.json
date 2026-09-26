@@ -1,0 +1,21 @@
+{
+  "name": "@dsh-external/dsh-router-presets",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "dsh-routing-local 的 preset 包：把 router-standard / router-spec 注册进 dsh 0.1.7+ 的 AgentPresetRegistry（声明制，取代旧的 .agent-presets 目录制）",
+  "main": "lib/index.mjs",
+  "exports": {
+    ".": "./lib/index.mjs",
+    "./router-bootstrap": "./lib/router-bootstrap.mjs",
+    "./router-bootstrap-spec": "./lib/router-bootstrap-spec.mjs",
+    "./gitbash-executor": "./router-standard/gitbash-executor.mjs",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

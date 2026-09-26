@@ -17,6 +17,8 @@
 import {
   bandFor, sessionMode, extractText, isComplexTask, sessionEvents
 } from './router-core-v34.mjs'
+// 代计数器（$DSH_HOME/router-presets/generation.json）：热重载用，见 lib/generation.mjs
+import { bumpGeneration } from '../lib/generation.mjs'
 import { join, dirname } from 'node:path'
 import { homedir, tmpdir } from 'node:os'
 import { pathToFileURL } from 'node:url'
@@ -1060,7 +1062,7 @@ export function apply(ctx, config) {
 
     n += make({
       name: 'dev_reload_preset_live',
-      description: '预设热重载（当前会话即时生效；own-layer shim 版）。',
+      description: '预设热重载（当前会话即时生效；own-layer shim 版）：代 +1 → recompose 重挂本 agent 的预设 → 稳定入口按新代重新导入实现模块。',
       parameters: { targetSessionId: { type: 'string', description: '目标会话 id（缺省 = 当前会话）' } },
       execute: async (shimArgs) => {
         const ap2 = ctx.get('agentPresets')
@@ -1069,23 +1071,12 @@ export function apply(ctx, config) {
         const targetSid2 = shimArgs?.targetSessionId || target2.session?.id || sid
         const before2 = ap2.composedPreset(target2.ctx) ?? 'unknown'
         if (before2 === 'unknown') return 'ERROR: 未加入预设'
-        const ymlFile2 = join(process.env.DSH_HOME || homedir(), '.agent-presets', before2, 'agent.cordis.yml')
-        let yml2 = ''
-        try { yml2 = readFileSync(ymlFile2, 'utf8') } catch (e) { return 'ERROR: 读取失败 ' + String(e) }
-        const refRe2 = /(name: \.\/[A-Za-z0-9._-]+\.mjs)(\?v=\d+)?/g
-        const b2 = []
-        yml2 = yml2.replace(refRe2, (whole, base, query) => {
-          const cur = query ? Number(query.slice(3)) : 0
-          b2.push(base.split('/').pop() + '->?v=' + (cur + 1))
-          return base + '?v=' + (cur + 1)
-        })
-        if (!b2.length) return 'ERROR: 无相对 .mjs 引用'
-        writeFileSync(ymlFile2, yml2, 'utf8')
+        const gen2 = bumpGeneration(before2)
         const stage2 = ensureStage()[targetSid2]?.stage ?? 0
         await ap2.recompose(target2.ctx, before2)
         applyStageRestrict(target2, stage2)
         const shimN = installMetaShim(target2)
-        return 'OK: shim live reloaded\n- bump: ' + b2.join(', ') + '\n- before=' + before2 + ' after=' + (ap2.composedPreset(target2.ctx) ?? before2) + '\n- shim=' + shimN
+        return 'OK: shim live reloaded（代 ' + gen2 + '）\n- generation: ' + before2 + ' → ' + gen2 + '\n- before=' + before2 + ' after=' + (ap2.composedPreset(target2.ctx) ?? before2) + '\n- shim=' + shimN
       },
     })
 
@@ -1202,7 +1193,7 @@ export function apply(ctx, config) {
 
   registerTool({
     name: 'dev_reload_preset_live',
-    description: '预设热重载（当前会话即时生效）：bump agent.cordis.yml 相对 .mjs 的 ?v=N → AgentPresets.recompose 把本 agent 重链到新 generation。仅在同预设自身向前兼容升级时使用（否则已记录工具调用可能在新代不可见）。',
+    description: '预设热重载（当前会话即时生效）：给本 preset 的代 +1 → AgentPresets.recompose 把本 agent 重链到新一代 → 稳定入口（lib/router-bootstrap.mjs）按新代重新导入本文件，绕开 ESM 缓存。仅在同预设自身向前兼容升级时使用（否则已记录工具调用可能在新代不可见）。',
     parameters: { targetSessionId: { type: 'string', description: '目标会话 id（缺省 = 当前会话）' } },
     output: { schema: { type: 'string' }, render: (_a, v) => [{ type: 'text', text: String(v) }] },
     async execute(args) {
@@ -1218,29 +1209,14 @@ export function apply(ctx, config) {
       if (!ap || !agent) return 'ERROR: agentPresets/agent 不可用 (target=' + label + ')'
       const before = ap.composedPreset(agent.ctx) ?? 'unknown'
       if (before === 'unknown') return 'ERROR: 当前 agent 未加入预设'
-      const home = process.env.DSH_HOME || homedir()
-      const presetDir = join(home, '.agent-presets', before)
-      const ymlFile = join(presetDir, 'agent.cordis.yml')
-      let yml = ''
-      try { yml = readFileSync(ymlFile, 'utf8') } catch (e) { return 'ERROR: 读取失败 ' + ymlFile + ' ' + String(e) }
-      const refRe = /(name: \.\/[A-Za-z0-9._-]+\.mjs)(\?v=\d+)?/g
-      let bumped = []
-      let matched = false
-      yml = yml.replace(refRe, (whole, base, query) => {
-        matched = true
-        const cur = query ? Number(query.slice(3)) : 0
-        bumped.push(base.split('/').pop() + ' -> ?v=' + (cur + 1))
-        return base + '?v=' + (cur + 1)
-      })
-      if (!matched) return 'ERROR: 无相对 .mjs 引用'
-      writeFileSync(ymlFile, yml, 'utf8')
+      const gen = bumpGeneration(before)
       const targetSid = (args && args.targetSessionId) || currentSession()?.id || agent.session?.id || ''
       const stage = ensureStage()[targetSid]?.stage ?? 0
       const preset = await ap.recompose(agent.ctx, before)
       applyStageRestrict(agent, stage)
       const after = ap.composedPreset(agent.ctx) ?? preset?.id ?? 'unknown'
       const shimN = installMetaShim(agent)
-      return 'OK: live reloaded\n- bump: ' + bumped.join(', ') + '\n- before: ' + before + '\n- after: ' + after + '\n- shim: ' + shimN + '\n本工具调用仍跑在旧代；下一轮请求即挂载新一代。'
+      return 'OK: live reloaded\n- generation: ' + before + ' → ' + gen + '\n- before: ' + before + '\n- after: ' + after + '\n- shim: ' + shimN + '\n本工具调用仍跑在旧代；下一轮请求即挂载新一代。'
     },
   })
 
