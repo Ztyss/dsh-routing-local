@@ -500,7 +500,18 @@ export function autoAdvance(stage, toolCalls, _text) {
 
 /* 阶段状态持久化 */
 const dshHomeForState = () => process.env.DSH_HOME || join(homedir(), '.dsh')
-const stageFile = () => process.env.DSH_ROUTER_STAGE_FILE || join(dshHomeForState(), 'router-standard', 'stages.json')
+/* v0.9 起状态统一收进 $DSH_HOME/router-presets/（与 status.json/generation.json 同根） */
+const stageFile = () => process.env.DSH_ROUTER_STAGE_FILE || join(dshHomeForState(), 'router-presets', 'router-standard', 'stages.json')
+/* 一次性迁移回退：v0.8.x 旧布局写在 $DSH_HOME/router-standard/，新文件缺失时读一次旧位置 */
+const legacyStageFile = () => join(dshHomeForState(), 'router-standard', 'stages.json')
+function readStageText() {
+  try {
+    return readFileSync(stageFile(), 'utf8')
+  } catch (e) {
+    if (e && e.code !== 'ENOENT') throw e
+    return readFileSync(legacyStageFile(), 'utf8')
+  }
+}
 let stageCache = null
 function ensureStage() {
   const file = stageFile()
@@ -511,7 +522,7 @@ function ensureStage() {
 }
 function loadStageState() {
   try {
-    const parsed = JSON.parse(readFileSync(stageFile(), 'utf8'))
+    const parsed = JSON.parse(readStageText())
     if (parsed && typeof parsed === 'object' && parsed.sessions && typeof parsed.sessions === 'object') {
       const out = {}
       for (const [sid, st] of Object.entries(parsed.sessions)) {
@@ -569,7 +580,7 @@ function applyStageRestrict(agent, stage) {
 }
 
 export function apply(ctx, config) {
-  try { mkdirSync(join(process.env.DSH_HOME || homedir(), 'router-standard'), { recursive: true }); writeFileSync(join(process.env.DSH_HOME || homedir(), 'router-standard', 'last-mount.txt'), 'new-gen v0.8 ' + new Date().toISOString(), 'utf8') } catch { /* marker */ }
+  try { mkdirSync(join(process.env.DSH_HOME || homedir(), 'router-presets', 'router-standard'), { recursive: true }); writeFileSync(join(process.env.DSH_HOME || homedir(), 'router-presets', 'router-standard', 'last-mount.txt'), 'new-gen v0.9 ' + new Date().toISOString(), 'utf8') } catch { /* marker */ }
   // 运行环境修整：① node 进 PATH（harness 的 node 在自定义运行时目录，不在系统 PATH——v1.5 实测
   // "node not recognized" 的根因）；② Git bin 前置（让 git 在任何 shell 都可用；bash 工具在 win32
   // 已禁用——host 的 shell seam 在 win32 只提供 pwsh，此前 bash 行在 win32 实为 pwsh 语义）。
@@ -585,7 +596,7 @@ export function apply(ctx, config) {
     // shell 解析诊断（v1.4.1→v1.5）：bash/node 实际解析到哪——事实文件，不再靠猜。
     try {
       const cands = fore.filter((e) => existsSync(join(e, process.platform === 'win32' ? 'bash.exe' : 'bash')))
-      writeFileSync(join(process.env.DSH_HOME || homedir(), 'router-standard', 'bash-diag.json'),
+      writeFileSync(join(process.env.DSH_HOME || homedir(), 'router-presets', 'router-standard', 'bash-diag.json'),
         JSON.stringify({ at: new Date().toISOString(), win32: process.platform === 'win32', nodeDir, gitCandidates: cands, nodeOnPath: fore.some((e) => existsSync(join(e, 'node.exe'))) }, null, 2), 'utf8')
     } catch { /* 诊断失败不阻塞 */ }
   } catch { /* PATH 修整失败不阻塞 */ }
