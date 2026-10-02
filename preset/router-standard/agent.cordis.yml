@@ -66,21 +66,24 @@
   name: ./router-bootstrap-v34.mjs?v=95
   config: {}
 
-# ── shell（win32：Git Bash 私有 shell seam——机制参照 liceses/dsh-gitbash-preset, MIT）──
+# ── shell（win32：Git Bash 私有 shell seam）──
 # host 在 win32 只装配 pwsh（dsh-base disabled bash-sandbox），bash 行会跑成 pwsh 语义。
-# 本组以 entry-local realm 提供私有 `shell` 服务（gitbash-executor：<gitBash> -lc <command>，
-# 每次调用新 shell，无 PTY 持久会话），同组 tool-bash 消费它 → Windows 上拿到真正的 Git Bash；
-# tool-pwsh 保留为降级选项（PowerShell 原生）。POSIX 走 host 原生 bash（组整体禁用）。
-# 诚实边界（不绕过沙箱）：MSYS 无法在受限令牌内启动——workspace-write 下 bash 可能启动失败，
-# 按指引做单次 danger-full-access 升级（走正常审批，不篡改策略）。
+# 本组以 entry-local realm 提供私有 `shell` 服务：`@deepseek-ai/dsh-bash-local` 以
+# `bash -c` 派生（PATH 上的 bash 即 Git for Windows），实现内核 shell seam 的
+# execute/resolve 契约（ShellProcess 句柄：result()/observed 增量读取/kill/宽限期），
+# 由内核包自身演进契约，preset 不再自研执行器。
+# tool-pwsh 保留为降级选项（PowerShell 原生）。POSIX 走 host 原生 bash（执行器行禁用，
+# tool-bash 落回 host seam）。
+# 诚实边界（不伪装沙箱）：本执行器不声明 sandboxMode——MSYS 无法在受限令牌内启动；
+# 需要更宽权限时按指引做单次升级（走正常审批，不篡改策略）。
 - id: gitbash-shell
   name: cordis:group
   group: true
   isolate:
     shell: true
   config:
-    - id: gitbash-executor
-      name: ./gitbash-executor.mjs?v=52
+    - id: bash-executor
+      name: '@deepseek-ai/dsh-bash-local'
       disabled: !!js process.platform !== 'win32'
       config: {}
 

@@ -43,8 +43,8 @@ export const plugins = [
     },
     config: [
       {
-        id: 'gitbash-executor',
-        name: '@dsh-external/dsh-router-presets/gitbash-executor',
+        id: 'bash-executor',
+        name: '@deepseek-ai/dsh-bash-local',
         disabled: false,
         config: {}
       },
