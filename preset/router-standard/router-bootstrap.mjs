@@ -1202,6 +1202,33 @@ export function apply(ctx, config) {
     return n
   }
 
+  // v186：dev_reset_experience 需要 plugin 域锚点。此前它仅由 installMetaShim 的 agent 域 make() 注册，
+  // 会话分段重播种（session/end-seed → 新 agent 域）后名字从请求面消失、下一步又回来，
+  // tool-registry 日志每个分段记一对 tool-removal/addition。其余常驻工具都有 plugin 域
+  // （registerTool）或 preset 挂载（tool-goal/tool-fs 等）锚点跨段存活，唯此工具是孤儿——
+  // 与 phase_begin/phase_advance 同模式补 plugin 域注册，名字跨段稳定，日志不再抖动。
+  registerTool({
+    name: 'dev_reset_experience',
+    description: '回到初档（阶段 0）并清空阶段工具（meta/goal 保留），用于在本会话内从头体验渐进披露；用 todo_write 可触发自动推进。',
+    parameters: {},
+    output: { schema: { type: 'string' }, render: (_a, v) => [{ type: 'text', text: String(v) }] },
+    async execute() {
+      const session = currentSession()
+      if (session === undefined) return 'no agent session'
+      const agent = currentAgent()
+      const sid = session.id
+      const st = (ensureStage()[sid] ??= { stage: 0, guided: false })
+      st.stage = 0
+      markStageConsumed(st, agent?.session)
+      saveStageState()
+      applyStageRestrict(agent, 0)
+      const ownT = agent?.ctx?.get?.('tools')?.layers?.scoped?.get?.(agent)?.tools
+      for (const nm of [...STAGES[2].tools, ...STAGES[3].tools]) { try { ownT?.data?.delete?.(nm) } catch { /* ignore */ } }
+      try { installMetaShim(agent, { installStage: false, stage: 0 }) } catch { /* ignore */ }
+      return 'reset to phase 0: ' + STAGES[0].name + '（stage tools cleared; meta/goal retained）——现在用 todo_write 触发自动推进'
+    },
+  })
+
   registerTool({
     name: 'dev_reload_preset_live',
     description: '预设热重载（当前会话即时生效）：给本 preset 的代 +1 → AgentPresets.recompose 把本 agent 重链到新一代 → 稳定入口（lib/router-bootstrap.mjs）按新代重新导入本文件，绕开 ESM 缓存。仅在同预设自身向前兼容升级时使用（否则已记录工具调用可能在新代不可见）。',

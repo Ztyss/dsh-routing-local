@@ -72,7 +72,7 @@ check('escalate-guide', src.includes('one-shot sandbox escalation') && src.inclu
 check('v112-bash-re-enabled', src.includes('gitbash-shell 组提供真 Git Bash'))
 check('restrict-double-filter', src.includes('restrictableNames'))
 check('node-on-path', src.includes("dirname(process.execPath"))
-check('v112-gitbash-executor', cfg.includes('gitbash-executor.mjs') && cfg.includes('gitbash-shell'))
+check('v186-bash-executor-local', cfg.includes("'@deepseek-ai/dsh-bash-local'") && cfg.includes('gitbash-shell'))
 check('v115-native-mode', src.includes("presentAs('native')") && src.includes('directly callable (native mode'))
 
 // 8. v1.6 三轮实弹：shim 输出透传 + 预放两档 + 直达语义 + URL 自动编码 + pressure 澄清
@@ -116,6 +116,7 @@ check('v183-external-schema', src.includes("enum: ['file','page','image','run','
 check('v183-own-first-index', src.includes('if (own) layersList.push(own)'))
 check('v183-domain-single-source', src.includes('export function categorizeDomain(') && src.split('const dom = categorizeDomain').length >= 3)
 check('v183-meta-reset-tool', src.includes("'delivery_check', 'dev_reset_experience'"))
+check('v186-reset-tool-plugin-scope', src.split("name: 'dev_reset_experience'").length - 1 >= 2 && src.includes("registerTool({\n    name: 'dev_reset_experience'"))
 
 // 12g. v0.2（本机定制）：阶段 0 纳入 MCP 知识工具 + 记忆机制随 engram 一并退役
 check('v02-mcp-in-stage0', src.includes("'mcp__codegraph__codegraph_explore', 'mcp__wiki-mcp__wiki_search', 'mcp__wiki-mcp__wiki_read'"))
