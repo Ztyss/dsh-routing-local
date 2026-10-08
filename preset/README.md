@@ -27,8 +27,8 @@ preset/
 │   ├── router-bootstrap.mjs       # router-standard 稳定入口（thin wrapper）
 │   ├── router-bootstrap-spec.mjs  # router-spec 稳定入口
 │   └── presets/            # 预设内容（由 tools/build-presets.mjs 从 <id>/agent.cordis.yml 生成）
-├── router-standard/        # bootstrap/core/executor + 双 selftest + agent.cordis.yml（人读源）
-├── router-spec/            # 同上
+├── router-standard/        # bootstrap/core + selftest + agent.cordis.yml（人读源）
+├── router-spec/            # bootstrap/core + agent.cordis.yml（人读源）
 └── tools/
     ├── build-presets.mjs   # agent.cordis.yml → lib/presets/<id>.mjs
     ├── verify-presets.mjs  # 核验每条引用的可解析性（内核升级后先跑这个）
@@ -53,12 +53,10 @@ node tools/build-presets.mjs      # 改完 <id>/agent.cordis.yml 后必须重跑
 node tools/verify-presets.mjs     # 65 条引用核验；内核升级后先跑这个（自动探测安装位，可用 DSH_APP_NODE_MODULES 覆盖）
 node tools/selftest.mjs           # 包级自检 8 项
 node router-standard/router-bootstrap-v34.selftest.mjs   # 台账要求的原位 selftest
-node router-standard/gitbash-executor.selftest.mjs
 ```
 
 - `<id>/agent.cordis.yml` 是**人读的源**，`?v=` 是改动戳（bump 纪律不变，selftest 会断言它递增）；
   内核不读这份 YAML——改完必须 `build-presets` 重新生成 `lib/presets/<id>.mjs` 再提交。
-- 别名文件（`router-bootstrap.mjs` / `router-bootstrap.selftest.mjs` / `router-core*.mjs`）改完用字节复制同步。
 - 预设 id 保持 `router-standard` / `router-spec`：会话头记的就是它们，改名等于历史会话无法恢复。
 - 本包**不声明 peerDependencies**：profile 的兼容性预检只看 `@deepseek-ai/dsh*` 的 peer 范围，
   写死范围会被整行禁用。

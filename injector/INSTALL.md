@@ -91,7 +91,7 @@ mkdir -p ~/.dsh/profiles/web/node_modules/@dsh-external
 # Windows（junction，无需管理员；用 Git Bash 执行）
 ln -s /你的路径/dsh-super-injector ~/.dsh/profiles/web/node_modules/@yjh051108/dsh-super-injector
 # 或 cmd（Windows 原生）
-mklink /J "%USERPROFILE%\.dsh\profiles\web\node_modules\@dsh-external\dsh-super-injector" "D:\你的路径\dsh-super-injector"
+mklink /J "%USERPROFILE%\.dsh\profiles\web\node_modules\@dsh-external\dsh-super-injector" "<本仓>\injector"
 # Linux/macOS（软链）
 ln -s /你的路径/dsh-super-injector ~/.dsh/profiles/web/node_modules/@yjh051108/dsh-super-injector
 ```
@@ -167,7 +167,7 @@ dev_self_test         → 一键回归 8 项，期望全部 PASS（含注入/热
 
 | 症状 | 原因与解法 |
 |---|---|
-| `dsh` 命令不存在 | dsh CLI 不在 PATH。Windows 上它随 DSH 安装提供（如 `C:\Users\你\.workbuddy\binaries\node\versions\22.22.2\dsh.cmd`），确认 PATH 或使用完整路径 |
+| `dsh` 命令不存在 | dsh CLI 不在 PATH。Windows 上它随 DSH 安装提供（`<DSH 安装位>\resources\app\node_modules\@deepseek-ai\dsh\lib\bin.js`，`<DSH 安装位>` = DSH Desktop 安装目录），确认 PATH 或使用完整路径 |
 | 装了但 `dev_*` 工具不存在 | 注入器未装配成功。检查：bundle 是否在 `~/.dsh/profiles/web/package.json` 的 `dsh.profile.bundles` 里；web 是否重启过；确认装的是**正在运行的 profile**（`--profile web` 与你的启动 profile 一致） |
 | 装配报 `entry not found` | patch 格式错误（顶层 `- id:` 而不是 `- insert:` 包裹）。参考方式 C 的示例 |
 | YAML 解析报错（两个顶层值） | `cordis.patch.yml` 里同时存在 `[]` 和 `- id:` 条目。清理为单一形式 |

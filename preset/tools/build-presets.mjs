@@ -65,7 +65,6 @@ function mapName(name) {
   const bare = name.replace(/\?v=\d+$/, '')
   const table = {
     './router-bootstrap-v34.mjs': `${SELF}/router-bootstrap`,
-    './gitbash-executor.mjs': `${SELF}/gitbash-executor`,
     './router-bootstrap-v10.mjs': `${SELF}/router-bootstrap-spec`,
     '@deepseek-ai/dsh-workflow-worker-thread': '@deepseek-ai/dsh-workflow-ptc',
   }

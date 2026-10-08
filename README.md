@@ -22,9 +22,9 @@ preset/                        dsh-router-presets 包（本机以 github 直装�
   lib/index.mjs                E1/E4 宿主入口：注册两个 preset（幂等）
   lib/router-bootstrap*.mjs    E3 稳定入口：按「代」动态导入实现
   lib/presets/*.mjs            E2 预设内容（由 tools/build-presets.mjs 生成）
-  tools/                       生成 / 核验 / 自检（build-presets · verify-presets · selftest）
-  router-standard/             bootstrap/core/executor + 双 selftest + agent.cordis.yml（人读源，B1–B7/C1）
-  router-spec/                 同上（D1/D2）
+  tools/                       生成 / 核验 / 自检（build-presets · verify-presets · kernel-roots · selftest）
+  router-standard/             bootstrap/core + selftest + agent.cordis.yml（人读源，B1–B8）
+  router-spec/                 bootstrap/core + agent.cordis.yml（人读源，D1/D2）
 docs/本地定制台账.md            唯一维护参考（现状台账 + 安装/升级/验证流程）
 ```
 
@@ -37,8 +37,7 @@ docs/本地定制台账.md            唯一维护参考（现状台账 + 安装
 |---|---|
 | injector A1–A4 | loadCache 可选链 · 剥 sourcemap（打包脚本）· 客户端 UI 置空 shim · 打包剥 devDeps/peerDeps |
 | preset 外壳 E1–E4 | 装配入口（`agentPresets.register` + bundle patch）· 包内子路径引用 · 「代」热重载 · 幂等注册 |
-| standard B1–B7 | persona 双键 · sessionEvents shim · MCP 工具进阶段 0 · 不接入 engram · skill 常驻 · 委派豁免阶段门控 · shell 纪律行 |
-| executor C1 | 信号融合（含 selftest） |
+| standard B1–B8 | persona 双键 · sessionEvents shim · MCP 工具进阶段 0 · 不接入 engram · skill 常驻 · 委派豁免阶段门控 · shell 纪律行 · 状态目录收口 |
 | spec D1/D2 | persona 双键 + sessionEvents shim · 读图能力查询 |
 
 ## 安装（本机消费本仓）
@@ -65,5 +64,5 @@ dsh plugin --profile web add "@dsh-external/dsh-super-injector@file:<输出目�
 ## 同步上游
 
 - **injector**：取上游新 release 源码覆盖 `injector/` → 对照台账第二节核对 A1/A3 是否已被上游吸收（未吸收则重放）→ commit/push → 本机重跑 github 直装 → 重启 DSH。
-- **preset**：取上游 `preset/router-standard` 与 `preset/router-spec` → 对照 B/C/D 清单重放本地定制 → 覆盖本仓 `preset/<id>/` → bump `?v=` → `node tools/build-presets.mjs` 重新生成 `lib/presets/` → 双 selftest + 包级 selftest → commit/push → 本机重跑 github 直装 → 重启 DSH → 新会话验证。
+- **preset**：取上游 `preset/router-standard` 与 `preset/router-spec` → 对照 B/C/D 清单重放本地定制 → 覆盖本仓 `preset/<id>/` → bump `?v=` → `node tools/build-presets.mjs` 重新生成 `lib/presets/` → 原位 selftest + 包级 selftest → commit/push → 本机重跑 github 直装 → 重启 DSH → 新会话验证。
 - 上游吸收情况每次同步时重新核对（以台账第二节为准）。

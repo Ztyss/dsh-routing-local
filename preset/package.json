@@ -9,7 +9,6 @@
     ".": "./lib/index.mjs",
     "./router-bootstrap": "./lib/router-bootstrap.mjs",
     "./router-bootstrap-spec": "./lib/router-bootstrap-spec.mjs",
-    "./gitbash-executor": "./router-standard/gitbash-executor.mjs",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
