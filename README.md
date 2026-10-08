@@ -6,7 +6,7 @@ dsh-routing-suite 的**私有维护仓**：同款组织方式（`injector/` + `p
 - 上游源：https://github.com/yjh051108/dsh-super-injector （injector，fork 自 tag v0.3.5）
 - 组织参照：https://github.com/yjh051108/dsh-routing-suite
 - 维护参考：**[docs/本地定制台账.md](docs/本地定制台账.md)**（唯一维护参考，权威副本在本仓）
-- 内核基线：`@deepseek-ai/dsh@0.1.7-rc.2`（DSH Desktop 2.0.15-next）；`0.2.0-rc.2`（DSH Desktop 2.0.17-next）已核验：65 条引用全部可解析、两 preset 注册成功
+- 内核基线：`@deepseek-ai/dsh@0.2.0-rc.2`（DSH Desktop 2.0.17-next）——已核验：65 条引用全部可解析、两 preset 注册成功
 
 ## 布局
 
