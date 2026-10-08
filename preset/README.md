@@ -5,7 +5,7 @@
 
 ```powershell
 dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:preset"
-# 重启 DSH 生效；装配后 loader 树里应出现 [active] router-presets (@dsh-external/dsh-router-presets)
+# 免重启：内核热感知装配变化，装完即注册；loader 树里应出现 [active] router-presets (@dsh-external/dsh-router-presets)
 ```
 
 ## 装配方式
@@ -32,7 +32,7 @@ preset/
 └── tools/
     ├── build-presets.mjs   # agent.cordis.yml → lib/presets/<id>.mjs
     ├── verify-presets.mjs  # 核验每条引用的可解析性（内核升级后先跑这个）
-    ├── kernel-roots.mjs    # 内核 node_modules 根探测（profile / app）
+    ├── kernel-roots.mjs    # 内核 node_modules 根探测（profile / app 多源自动探测）
     └── selftest.mjs        # 包级离线自检（幂等注册 / 代计数器 / 动态导入）
 ```
 
@@ -50,7 +50,7 @@ preset/
 ```powershell
 cd <本仓>\preset
 node tools/build-presets.mjs      # 改完 <id>/agent.cordis.yml 后必须重跑（--check 只报告）
-node tools/verify-presets.mjs     # 65 条引用核验；内核升级后先跑这个
+node tools/verify-presets.mjs     # 65 条引用核验；内核升级后先跑这个（自动探测安装位，可用 DSH_APP_NODE_MODULES 覆盖）
 node tools/selftest.mjs           # 包级自检 8 项
 node router-standard/router-bootstrap-v34.selftest.mjs   # 台账要求的原位 selftest
 node router-standard/gitbash-executor.selftest.mjs

@@ -6,7 +6,7 @@ dsh-routing-suite 的**私有维护仓**：同款组织方式（`injector/` + `p
 - 上游源：https://github.com/yjh051108/dsh-super-injector （injector，fork 自 tag v0.3.5）
 - 组织参照：https://github.com/yjh051108/dsh-routing-suite
 - 维护参考：**[docs/本地定制台账.md](docs/本地定制台账.md)**（唯一维护参考，权威副本在本仓）
-- 内核基线：`@deepseek-ai/dsh@0.1.7-rc.2`（DSH Desktop 2.0.15-next）
+- 内核基线：`@deepseek-ai/dsh@0.1.7-rc.2`（DSH Desktop 2.0.15-next）；`0.2.0-rc.2`（DSH Desktop 2.0.17-next）已核验：65 条引用全部可解析、两 preset 注册成功
 
 ## 布局
 
@@ -48,7 +48,7 @@ docs/本地定制台账.md            唯一维护参考（现状台账 + 安装
 # 前置：全局 git schannel + gh 凭据
 dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:injector"
 dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:preset"
-# 重启 DSH 生效
+# preset 包免重启：内核热感知装配变化，装完即注册；injector 仍需重启 DSH 生效
 ```
 
 ## 从源码重建发布 tgz（需要发布件时才走这条）
