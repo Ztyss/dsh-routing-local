@@ -30,6 +30,10 @@ export const plugins = [
     }
   },
   {
+    id: 'time-context',
+    name: '@deepseek-ai/dsh-time-context'
+  },
+  {
     id: 'router-bootstrap',
     name: '@dsh-external/dsh-router-presets/router-bootstrap',
     config: {}
@@ -67,7 +71,10 @@ export const plugins = [
   },
   {
     id: 'tool-fs',
-    name: '@deepseek-ai/dsh-tool-fs'
+    name: '@deepseek-ai/dsh-tool-fs',
+    config: {
+      applyPatch: false
+    }
   },
   {
     id: 'tool-fs-search',
@@ -85,12 +92,20 @@ export const plugins = [
     name: '@deepseek-ai/dsh-tool-jobs'
   },
   {
+    id: 'tool-schedule',
+    name: '@deepseek-ai/dsh-tool-schedule'
+  },
+  {
     id: 'skill-filesystem',
     name: '@deepseek-ai/dsh-skill-filesystem'
   },
   {
     id: 'tool-skill',
     name: '@deepseek-ai/dsh-tool-skill'
+  },
+  {
+    id: 'command-goal',
+    name: '@deepseek-ai/dsh-command-goal'
   },
   {
     id: 'tool-goal',
@@ -108,7 +123,7 @@ export const plugins = [
         id: 'plan-mode',
         name: '@deepseek-ai/dsh-plan-mode',
         config: {
-          section: "You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.\n" +
+          section: "You are in plan mode. Stay in plan mode until the user approves your plan through exit_plan_mode or switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.\n" +
             '\n' +
             'Explore first. Use non-mutating reads, searches, static analysis, and checks to ground the plan in the actual repository. Do not edit or write files, change configuration, run formatters or code generation that rewrites tracked files, commit, or otherwise carry out the plan. Prefer existing functions and patterns over new machinery.\n' +
             '\n' +
@@ -173,6 +188,8 @@ export const plugins = [
         config: {
           provider: 'spawn',
           toolName: 'subagent',
+          modelSelection: true,
+          modelDiscovery: true,
           backgroundMode: 'continuable'
         }
       },
@@ -243,9 +260,18 @@ export const plugins = [
     id: 'tool-web',
     name: '@deepseek-ai/dsh-tool-web',
     config: {
-      fetch: false,
+      fetch: true,
       searchTimeoutMs: 60000
     }
+  },
+  {
+    id: 'present',
+    name: '@deepseek-ai/dsh-tool-present'
+  },
+  {
+    id: 'tool-plugin-manager',
+    name: '@deepseek-ai/dsh-plugin-manager/tools',
+    disabled: false
   }
 ]
 
