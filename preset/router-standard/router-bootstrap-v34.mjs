@@ -634,7 +634,28 @@ export function apply(ctx, config) {
 
     if (!promoted) {
       // 首轮：无 restrict + 工具面只留 phase_begin（纯 RL 条件 = 稳定 we）
-      return { ...assembled, sections: baseSections, contexts: [], tools: assembled.tools.filter((tool) => tool.name === 'phase_begin') }
+      // dsh 0.2.2+：assembly 不再携带 tools（工具面 provider-owned），首轮门控改走
+      // tools.restrict({allow:['phase_begin']})，经 restrictableNames 过滤防 unknown 抛错，
+      // 失败回退全量面；旧内核保留 assembled.tools 改写路径。phase_begin.execute →
+      // applyStageRestrict(agent, 0) 会经 sharedLift lift 本处登记并换上阶段 0 窗口。
+      if (Array.isArray(assembled.tools)) {
+        return { ...assembled, sections: baseSections, contexts: [], tools: assembled.tools.filter((tool) => tool.name === 'phase_begin') }
+      }
+      try {
+        const ts0 = agent?.ctx?.get?.('tools')
+        if (ts0 && typeof ts0.restrict === 'function') {
+          const prev0 = sharedLift.get(session.id)
+          if (prev0) { try { prev0() } catch { /* ignore */ }; sharedLift.delete(session.id) }
+          let known0 = null
+          try { if (typeof ts0.view === 'function') known0 = new Set(ts0.view(agent).restrictableNames) } catch { /* fall through */ }
+          const allow0 = ['phase_begin'].filter((t) => known0 === null || known0.has(t))
+          if (allow0.length > 0) {
+            const disposer0 = ts0.restrict({ allow: allow0 })
+            if (disposer0) sharedLift.set(session.id, disposer0)
+          }
+        }
+      } catch { /* 门控失败不阻塞：首轮全量面（降级） */ }
+      return { ...assembled, sections: baseSections, contexts: [] }
     }
 
     // promoted：官方 sections 回流（persona 保持 RL 句）+ 引导带宽控 + 阶段声明 + 常驻段
@@ -652,7 +673,9 @@ export function apply(ctx, config) {
     // 声明与主动性常驻（人设常驻：不经压缩丢失；bootstrap 消息可能被 compaction 剪掉）
     sections.push({ name: 'router-decl', order: 2, text: PROGRESSIVE_DECL })
     sections.push({ name: 'router-proactivity', order: 3, text: PRESSURE_GUIDE.replace(/^\n+/, '') })
-    const available = new Set(assembled.tools.map((tool) => tool.name))
+    // dsh 0.2.2+：assembled.tools 不存在（provider-owned），空集 → run_code 分支自然跳过；
+    // promoted 阶段门控由 applyStageRestrict（tools.restrict）承担，与本处无关。
+    const available = new Set((Array.isArray(assembled.tools) ? assembled.tools : []).map((tool) => tool.name))
     if (available.has('run_code')) {
       const staged = buildStagedSdk(sections, stage)
       if (staged) {

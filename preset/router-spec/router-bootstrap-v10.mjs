@@ -133,6 +133,10 @@ export function apply(ctx, config) {
     }
   })
 
+  // dsh 0.2.2+ 首轮 restrict 的登记表：session id → disposer。promoted（首个 tool/call
+  // 落盘）时 lift，恢复全量面——与旧内核 assembled.tools 只影响首轮请求的语义对齐。
+  const firstTurnLift = new Map()
+
   ctx.on('system-prompt/assemble', async (_assembly, context, next) => {
     const assembled = await next()
     const agent = context.agent
@@ -177,11 +181,19 @@ export function apply(ctx, config) {
       // minimization. After the first durable tool/call the router stops
       // touching anything — standard mode restores the full sections/contexts;
       // spec mode keeps its classified persona over the untrimmed list.
+      const lift = firstTurnLift.get(session.id)
+      if (lift) { try { lift() } catch { /* ignore */ }; firstTurnLift.delete(session.id) }
       if (routerMode === 'standard') return assembled
       return { ...assembled, sections, contexts: [] }
     }
 
-    const available = new Set(assembled.tools.map((tool) => tool.name))
+    // dsh 0.2.2+: assembly no longer carries tools (provider-owned surface);
+    // derive catalog names from tools.view().visible instead.
+    const toolsSvc = agent?.ctx?.get?.('tools')
+    const view = typeof toolsSvc?.view === 'function' ? toolsSvc.view(agent) : undefined
+    const available = new Set(Array.isArray(assembled.tools)
+      ? assembled.tools.map((tool) => tool.name)
+      : (view?.visible ? [...view.visible.keys()] : []))
     const shell = available.has('pwsh') ? 'pwsh' : available.has('bash') ? 'bash' : null
     if (shell === null) {
       throw new Error(`${name}: no platform shell in catalog`)
@@ -198,12 +210,31 @@ export function apply(ctx, config) {
       }
     } catch { /* 能力查询失败：保持首轮面不变，不做猜测 */ }
 
-    return {
-      ...assembled,
-      sections,
-      contexts: [],
-      tools: assembled.tools.filter((tool) => core.has(tool.name)),
+    if (Array.isArray(assembled.tools)) {
+      // Legacy kernels: swap the surface through the assembly.
+      return {
+        ...assembled,
+        sections,
+        contexts: [],
+        tools: assembled.tools.filter((tool) => core.has(tool.name)),
+      }
     }
+    // dsh 0.2.2+: gate the first-turn surface via tools.restrict(); lifted on
+    // promote (firstTurnLift above). Names filtered by restrictableNames so a
+    // missing platform tool cannot abort the whole gate.
+    try {
+      if (typeof toolsSvc?.restrict === 'function') {
+        const known = new Set(view?.restrictableNames ?? [])
+        const allow = [...core].filter((t) => known.size === 0 || known.has(t))
+        if (allow.length > 0) {
+          const prev = firstTurnLift.get(session.id)
+          if (prev) { try { prev() } catch { /* ignore */ }; firstTurnLift.delete(session.id) }
+          const disposer = toolsSvc.restrict({ allow })
+          if (disposer) firstTurnLift.set(session.id, disposer)
+        }
+      }
+    } catch { /* gate failure: keep the full surface (degraded) */ }
+    return { ...assembled, sections, contexts: [] }
   })
 
   // ── near-field routing guidance for weak mode (P14/P16/P17/P19/P20) ─────
