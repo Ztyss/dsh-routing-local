@@ -12,7 +12,7 @@ dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:preset"
 
 `lib/index.mjs` 是唯一入口，用 `ctx.agentPresets.register()` 注册两份定义
 （`router-standard` / `router-spec`）；`cordis.patch.yml` 给宿主启动一个插入行。
-宿主启动装配与热装配（super-injector 的 `dev_install_package` → `loader.create`）共用这一入口，
+宿主启动装配与热装配（`loader.create`）共用这一入口，
 所以 `apply()` 做两级幂等：模块级引用计数（同实例多行只注册一次）+ 重名容忍（别的行已注册时「借用」而非报错）。
 
 ## 目录结构

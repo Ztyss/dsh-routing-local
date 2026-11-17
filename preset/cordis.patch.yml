@@ -2,7 +2,7 @@
 #
 # 只做一件事：把本包挂成一行普通插件；两个 agent preset 的注册发生在
 # lib/index.mjs 的 apply() 里（等价于一条 @deepseek-ai/dsh-agent-preset 声明，
-# 但宿主启动装配与热装配（dev_install_package → loader.create）共用同一入口）。
+# 但宿主启动装配与热装配（loader.create）共用同一入口）。
 #
 # 刻意不声明 peerDependencies：profile 的兼容性预检只检查 @deepseek-ai/dsh* 的
 # peer 范围，本包写死范围反而会在内核升级时被整行禁用。

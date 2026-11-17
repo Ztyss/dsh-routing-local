@@ -6,7 +6,7 @@
  * `.agent-presets/<id>/agent.cordis.yml`，而是宿主组合里的一个声明
  * （`@deepseek-ai/dsh-agent-preset` 的 config）——本插件用同样的 config 形状
  * 调 `ctx.agentPresets.register()`，等价于一条声明行，但让「热装配」路径
- * （super-injector 的 dev_install_package → loader.create('<包名>')）也能立即生效。
+ * （插件安装触发的 loader.create('<包名>')）也能立即生效。
  *
  * 双路径并存，所以 apply() 必须幂等：安装那一刻 patch 行与 loader.create 行会
  * 同时挂载本包（同 id 注册第二次会抛 Duplicate agent preset）。这里用两级兜底：
