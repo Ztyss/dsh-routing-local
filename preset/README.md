@@ -1,10 +1,10 @@
-# preset —— dsh-router-presets（router-standard / router-spec 的装配入口）
+﻿# preset —— dsh-router-presets（router-standard / router-spec 的装配入口）
 
 本目录既是两个 preset 的**实现源**，也是一个可被 dsh 直接消费的**插件包**
 （`@dsh-external/dsh-router-presets`）。本机以 github 直装消费：
 
 ```powershell
-dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:preset"
+dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:/preset"
 # 免重启：内核热感知装配变化，装完即注册；loader 树里应出现 [active] router-presets (@dsh-external/dsh-router-presets)
 ```
 

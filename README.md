@@ -1,4 +1,4 @@
-# dsh-routing-local
+﻿# dsh-routing-local
 
 本机定制版 presets 的**私有维护仓**：收拢 router-standard / router-spec 两个
 agent preset（`preset/` 包）。
@@ -36,7 +36,7 @@ docs/本地定制台账.md            唯一维护参考（现状台账 + 安装
 
 ```bash
 # github 直装（pnpm 走 git 拉私有仓；前置：全局 git schannel + gh 凭据）
-dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:preset"
+dsh plugin --profile web add "github:Ztyss/dsh-routing-local#path:/preset"
 # preset 包免重启：内核热感知装配变化，装完即注册
 ```
 
