@@ -1,9 +1,9 @@
-{
+﻿{
   "name": "@dsh-external/dsh-router-presets",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
-  "description": "dsh-routing-local 的 preset 包：把 router-standard / router-spec 注册进 dsh 0.1.7+ 的 AgentPresetRegistry（声明制，取代旧的 .agent-presets 目录制）",
+  "description": "dsh-routing-local 鐨?preset 鍖咃細鎶?router-standard / router-spec 娉ㄥ唽杩?dsh 0.1.7+ 鐨?AgentPresetRegistry锛堝０鏄庡埗锛屽彇浠ｆ棫鐨?.agent-presets 鐩綍鍒讹級",
   "main": "lib/index.mjs",
   "exports": {
     ".": "./lib/index.mjs",
