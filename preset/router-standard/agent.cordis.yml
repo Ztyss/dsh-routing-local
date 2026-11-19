@@ -215,10 +215,12 @@
     - id: compaction-basic
       name: '@deepseek-ai/dsh-compaction-basic'
       config:
-        # 阈值 0.8 = 内核默认（DEFAULT_THRESHOLD_RATIO），与 router-spec（无 config，
-        # 吃同一默认）对齐；合法域 (0, 1]，retainRatio 须小于 thresholdRatio。
+        # 与 router-spec 完全对齐：spec 无压缩配置，吃内核默认——阈值
+        # DEFAULT_THRESHOLD_RATIO = 0.8，保留 DEFAULT_RETAIN_RATIO = 0.16；两键
+        # 显式写死同值，防内核默认漂移时行为悄然改变。合法域 (0, 1]，且
+        # retainRatio 须小于 thresholdRatio。
         thresholdRatio: 0.8
-        retainRatio: 0.2
+        retainRatio: 0.16
         # 注意：压缩配置必须写在这里才生效——settings.yaml 顶层的 `compaction-basic:` 段没有任何
         # 读取方（dsh-compaction-basic 不注册 settings 命名空间），写在那里等于没写。
 
