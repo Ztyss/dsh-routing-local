@@ -151,7 +151,7 @@ export const plugins = [
         id: 'compaction-basic',
         name: '@deepseek-ai/dsh-compaction-basic',
         config: {
-          thresholdRatio: 0.55,
+          thresholdRatio: 0.8,
           retainRatio: 0.2
         }
       },

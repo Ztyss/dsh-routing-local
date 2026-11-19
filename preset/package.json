@@ -1,6 +1,6 @@
 {
   "name": "@dsh-external/dsh-router-presets",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "type": "module",
   "description": "dsh-routing-local 的 preset 包：把 router-standard / router-spec 注册进 dsh 0.1.7+ 的 AgentPresetRegistry（声明制，取代旧的 .agent-presets 目录制）",
